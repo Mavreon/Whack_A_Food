@@ -9,12 +9,15 @@ public class GameManagerX : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI gameOverText;
+    public TextMeshProUGUI youWinText;
+    public TextMeshProUGUI countDownText;
     public GameObject titleScreen;
     public Button restartButton; 
 
     public List<GameObject> targetPrefabs;
 
     private int score;
+    public int countdown = 10;
     private float spawnRate = 1.5f;
     public bool isGameActive;
 
@@ -23,13 +26,14 @@ public class GameManagerX : MonoBehaviour
     private float minValueY = -3.75f; //  y value of the center of the bottom-most square
     
     // Start the game, remove title screen, reset score, and adjust spawnRate based on difficulty button clicked
-    public void StartGame()
+    public void StartGame(int difficulty)
     {
-        spawnRate /= 5;
+        spawnRate /= difficulty; //Made changes...
         isGameActive = true;
         StartCoroutine(SpawnTarget());
         score = 0;
         UpdateScore(0);
+        UpdateCountdown(); //Function handling countdown...
         titleScreen.SetActive(false);
     }
 
@@ -70,15 +74,24 @@ public class GameManagerX : MonoBehaviour
     public void UpdateScore(int scoreToAdd)
     {
         score += scoreToAdd;
-        scoreText.text = "score";
+        scoreText.text = "score : " + score;//Made changes...
     }
 
     // Stop game, bring up game over text and restart button
     public void GameOver()
     {
         gameOverText.gameObject.SetActive(true);
-        restartButton.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(true);
         isGameActive = false;
+        CancelInvoke("Countdown");
+    }
+    //Stop game, bring up you win text and restart button
+    private void YouWin()
+    {
+        youWinText.gameObject.SetActive(true);
+        restartButton.gameObject.SetActive(true);
+        isGameActive = false;
+        CancelInvoke("Countdown");
     }
 
     // Restart game by reloading the scene
@@ -87,4 +100,23 @@ public class GameManagerX : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    //Functions handling countdown conditions...
+    private void Countdown()
+    {
+        if (countdown> 0)
+        {
+            countdown--;
+            countDownText.text = "Countdown : " + countdown;
+        }
+        else
+        {
+            YouWin();
+        }
+    }
+
+    private void UpdateCountdown()
+    {
+        countDownText.text = "Countdown : " + countdown;
+        InvokeRepeating("Countdown", 1.0f,1.0f);
+    }
 }
